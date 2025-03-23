@@ -40,10 +40,13 @@ void SearchPassword(string& username)
 	}
 	string ligne;
 	bool found = false;
-
+	
+	
 	while (getline(PasswordFile2, ligne))
 	{
-		if (ligne == username)
+		size_t pos = ligne.find(":");
+		string username_find = ligne.substr(0, pos);
+		if (username_find == username)
 		{
 			found = true;
 			break;
@@ -51,14 +54,17 @@ void SearchPassword(string& username)
 	}
 
 	PasswordFile2.close();
-	size_t pos = ligne.find(":");
+	
 	if (found)
 	{
-		string password = ligne.substr(pos + 1);
+		string password = ligne.substr(ligne.find(":") + 1);
 		cout << "Username Found !" << endl;
 		cout << "Password : " << password << endl;
 	}
 	else
+	{
+
+	}
 	{
 		cout << "No username found" << endl;
 
