@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <cstdio>
 
 #include "PasswordManager.h"
 
@@ -73,6 +74,69 @@ void SearchPassword(string& username)
 
 }
 
+void ShowAllPassword()
+{
+	string ligne;
+	ifstream PasswordFile2("Password.txt");
+	if (!PasswordFile2)
+	{
+		cout << "Error opening the file. \n" << endl;
+	}
+	bool foundsomething = false;
+	while (getline(PasswordFile2, ligne))
+	{
+		if (ligne.empty()) continue;
+		size_t pos = ligne.find(":");
+		string username = ligne.substr(0, pos);
+		string password = ligne.substr(ligne.find(":") + 1);
+		cout << username << ":" << password << endl;
+		foundsomething = true;
+	}
+
+	if (!foundsomething)
+	{
+		cout << "No account find" << endl;
+
+	}
+}
+
+
+
+void DeleteAccount()
+{
+	string account;
+	string ligne;
+	cout << "Which account do you want to delete ? (Enter the username of the account) : \n" << endl;
+	cin >> account;
+	ifstream AccountFile_read("Password.txt");
+	ofstream AccountFile_write("temp.txt");
+	size_t pos = ligne.find(":");
+	string username = ligne.substr(0, pos);
+	string password = ligne.substr(ligne.find(":") + 1);
+	while(getline(AccountFile_read, ligne))
+	{
+		if (account != username)
+		{
+			AccountFile_write << username << ":" << password << endl;
+
+		}
+		AccountFile_read.close();
+		AccountFile_write.close()
+		if (remove("Password.txt") != 0)
+		{
+			cout << "Error deleting the file" << endl;
+		}
+		else if (rename("temp.txt", "Password.txt") != 0)
+		{
+			cout << "Error renaming the file" << endl;
+		}
+		else
+		{
+			cout << "Account deleted successfully" << endl;
+		}
+	}
+
+}
 
 void DisplayMenu()
 {
@@ -83,7 +147,7 @@ void DisplayMenu()
 		int choice;
 		string password;
 		string username;
-		cout << "1) Add a Password \n 2) retrieve a password \n 3) Quit \n" << endl;
+		cout << "1) Add a Password \n 2) retrieve a password \n 3) show all saved account \n 4) Delete a password \n 5) Quit \n" << endl;
 		cin >> choice;
 
 		if (choice == 1)
@@ -97,8 +161,34 @@ void DisplayMenu()
 
 		else if (choice == 3)
 		{
+
+			string adminPassword = "Admin1234"; //You can change the password to a custom one.
+			string passwordInput;
+			cout << "Enter the password to get the list of all the account" << endl;
+			cin >> passwordInput;
+			if (passwordInput == adminPassword)
+			{
+				ShowAllPassword();
+			}
+			else
+			{
+				cout << "Wrong password, command denied" << endl;
+				DisplayMenu();
+
+			}
+
+		}
+
+		else if (choice == 4)
+		{
+			DeleteAccount(password);
+		}
+
+		else if (choice == 5)
+		{
 			break;
 		}
+
 		else if (cin.fail())
 		{
 			cout << "Enter a number !" << endl;
