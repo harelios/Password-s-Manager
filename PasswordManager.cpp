@@ -101,27 +101,32 @@ void ShowAllPassword()
 }
 
 
-
 void DeleteAccount()
 {
 	string account;
 	string ligne;
+	bool found = false;
 	cout << "Which account do you want to delete ? (Enter the username of the account) : \n" << endl;
 	cin >> account;
 	ifstream AccountFile_read("Password.txt");
 	ofstream AccountFile_write("temp.txt");
-	size_t pos = ligne.find(":");
-	string username = ligne.substr(0, pos);
-	string password = ligne.substr(ligne.find(":") + 1);
-	while(getline(AccountFile_read, ligne))
+	while (getline(AccountFile_read, ligne))
 	{
+		size_t pos = ligne.find(":");
+		string username = ligne.substr(0, pos);
+		string password = ligne.substr(ligne.find(":") + 1);
 		if (account != username)
 		{
 			AccountFile_write << username << ":" << password << endl;
 
 		}
-		AccountFile_read.close();
-		AccountFile_write.close()
+		else
+		{
+			found = true;
+		}
+	}
+	AccountFile_read.close();
+	AccountFile_write.close();
 		if (remove("Password.txt") != 0)
 		{
 			cout << "Error deleting the file" << endl;
@@ -132,15 +137,19 @@ void DeleteAccount()
 		}
 		else
 		{
-			cout << "Account deleted successfully" << endl;
+			if (found)
+				{
+					cout << "Account deleted successfully" << endl;
+				}
+			else
+			{
+				cout << "Account not found." << endl;
+			}
 		}
-	}
-
 }
 
 void DisplayMenu()
 {
-
 	while (true)
 	{
 		cout << "---------------------------Password's Manager--------------------------------" << endl;
@@ -181,7 +190,7 @@ void DisplayMenu()
 
 		else if (choice == 4)
 		{
-			DeleteAccount(password);
+			DeleteAccount();
 		}
 
 		else if (choice == 5)
