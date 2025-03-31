@@ -8,6 +8,23 @@
 using namespace std;
 
 
+string encrypt(const string& password)
+{
+	string encrypted = password;
+	char key = 42;
+	for (char& c : encrypted)
+	{
+		c ^= key; //Use of the Xor operator to encrypt the password
+	}
+	return encrypted;
+}
+
+string decrypt(const string& encrypted)
+{
+	return encrypt(encrypted);
+
+}
+
 
 void AddPassword(string& password, string& username)
 {
@@ -16,10 +33,11 @@ void AddPassword(string& password, string& username)
 	cin >> username;
 	cout << "Enter a Password you want to add : " << endl;
 	cin >> password;
+	string password_encrypted = encrypt(password);
 	ofstream PasswordFile("Password.txt", ios::app); //Don't erase the file each time he is open
 	if (PasswordFile)
 	{
-		PasswordFile << username << ":" << password << endl;
+		PasswordFile << username << ":" << password_encrypted << endl;
 		PasswordFile.close();
 		cout << "Username + Password Saved !" << endl;
 	}
@@ -89,7 +107,8 @@ void ShowAllPassword()
 		size_t pos = ligne.find(":");
 		string username = ligne.substr(0, pos);
 		string password = ligne.substr(ligne.find(":") + 1);
-		cout << username << ":" << password << endl;
+		string decrypted_password = decrypt(password);
+		cout << username << ":" << decrypted_password << endl;
 		foundsomething = true;
 	}
 
@@ -147,6 +166,7 @@ void DeleteAccount()
 			}
 		}
 }
+
 
 void DisplayMenu()
 {
