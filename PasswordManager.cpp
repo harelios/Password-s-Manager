@@ -7,8 +7,7 @@
 
 using namespace std;
 
-
-string encrypt(const string& password)
+string Encrypt(const string& password)
 {
 	string encrypted = password;
 	char key = 42;
@@ -19,9 +18,9 @@ string encrypt(const string& password)
 	return encrypted;
 }
 
-string decrypt(const string& encrypted)
+string Decrypt(const string& encrypted)
 {
-	return encrypt(encrypted);
+	return Encrypt(encrypted);
 
 }
 
@@ -33,7 +32,7 @@ void AddPassword(string& password, string& username)
 	cin >> username;
 	cout << "Enter a Password you want to add : " << endl;
 	cin >> password;
-	string password_encrypted = encrypt(password);
+	string password_encrypted = Encrypt(password);
 	ofstream PasswordFile("Password.txt", ios::app); //Don't erase the file each time he is open
 	if (PasswordFile)
 	{
@@ -59,8 +58,8 @@ void SearchPassword(string& username)
 	}
 	string ligne;
 	bool found = false;
-	
-	
+
+
 	while (getline(PasswordFile2, ligne))
 	{
 		size_t pos = ligne.find(":");
@@ -73,7 +72,7 @@ void SearchPassword(string& username)
 	}
 
 	PasswordFile2.close();
-	
+
 	if (found)
 	{
 		string password = ligne.substr(ligne.find(":") + 1);
@@ -82,14 +81,8 @@ void SearchPassword(string& username)
 	}
 	else
 	{
-
-	}
-	{
 		cout << "No username found" << endl;
-
 	}
-
-
 }
 
 void ShowAllPassword()
@@ -107,7 +100,7 @@ void ShowAllPassword()
 		size_t pos = ligne.find(":");
 		string username = ligne.substr(0, pos);
 		string password = ligne.substr(ligne.find(":") + 1);
-		string decrypted_password = decrypt(password);
+		string decrypted_password = Decrypt(password);
 		cout << username << ":" << decrypted_password << endl;
 		foundsomething = true;
 	}
@@ -137,7 +130,6 @@ void DeleteAccount()
 		if (account != username)
 		{
 			AccountFile_write << username << ":" << password << endl;
-
 		}
 		else
 		{
@@ -157,16 +149,65 @@ void DeleteAccount()
 		else
 		{
 			if (found)
-				{
+			{	
 					cout << "Account deleted successfully" << endl;
-				}
+			}
 			else
 			{
-				cout << "Account not found." << endl;
+					cout << "Account not found." << endl;
 			}
 		}
-}
+} 
 
+void ModifyPassword()
+{
+	string account;
+	string ligne;
+	string new_password;
+	cout << "What account do you want to modify ? (enter username) " << endl;
+	cin >> account;
+	cout << "Enter the new password : \n" << endl;
+	cin >> new_password;
+	ifstream File_read("Password.txt");
+	ofstream File_write("temp.txt");
+	bool found = false;
+	while (getline(File_read, ligne))
+	{
+		size_t pos = ligne.find(":");
+		string username = ligne.substr(0, pos);
+		string password = ligne.substr(ligne.find(":") + 1);
+		
+
+		if (account == username)
+		{
+			File_write << username << ":" << Encrypt(new_password) << endl;
+			found = true;
+		}
+		else
+		{
+			File_write << ligne << endl;
+		}
+	}
+	File_read.close();
+	File_write.close();
+	if (found)
+	{
+		if (remove("Password.txt") != 0)
+		{
+			cout << "Error removing the file." << endl;
+		}
+		else if (rename("temp.txt", "Password.txt") != 0)
+		{
+			cout << "Error renaming the file." << endl;
+		}	cout << "Password modified !" << endl;
+
+	}
+	else
+	{
+		cout << "Account not found" << endl;
+	}
+	
+}
 
 void DisplayMenu()
 {
@@ -176,7 +217,7 @@ void DisplayMenu()
 		int choice;
 		string password;
 		string username;
-		cout << "1) Add a Password \n 2) retrieve a password \n 3) show all saved account \n 4) Delete a password \n 5) Quit \n" << endl;
+		cout << "1) Add a Password \n 2) retrieve a password \n 3) show all saved account \n 4) Delete a password \n 5) Modify a password \n 6) Quit \n" << endl;
 		cin >> choice;
 
 		if (choice == 1)
@@ -212,8 +253,12 @@ void DisplayMenu()
 		{
 			DeleteAccount();
 		}
-
 		else if (choice == 5)
+		{
+			ModifyPassword();
+		}
+
+		else if (choice == 6)
 		{
 			break;
 		}
@@ -233,5 +278,3 @@ void DisplayMenu()
 	}
 
 }
-
-
