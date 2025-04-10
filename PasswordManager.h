@@ -11,13 +11,14 @@ void SearchPassword(std::string& username); //Function to search a password.
 
 void DisplayMenu(); //Function to display the menu of the tool.
 
-void ShowAllPassword(); //Function to show all the account saved (Need the Password's Admin to run it)
+void ShowAllPassword(); //Function to show all the account saved. (Need the Password's Admin to run it)
 
 void DeleteAccount(); //Function to delete an account (username + password) in the file.
 
-std::string encrypt(const std::string& password);
+std::string Encrypt(const std::string& password); //Function to encrypt the password.
 
-std::string decrypt(const std::string& encrypted);
+std::string Decrypt(const std::string& encrypted); //Function to decrypt the password.
 
+void ModifyPassword();
 
 #endif 
