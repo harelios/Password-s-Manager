@@ -1,19 +1,27 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "PasswordManager.h"
+#include "QInputDialog"
+#include "QMessageBox"
 
-void MainWindow::checkPassword()
+bool MainWindow::checkPassword()
 {
-    QString enteredPassword = ui->lineEdit_InputPassword->text();
+    bool verify;
+    QString enteredPassword = QInputDialog::getText(this, "Password required", "Enter the password owner : ", QLineEdit::Password, "",&verify);
     QString masterPassword = "Admin1234";
-    if(enteredPassword == masterPassword)
+    if(!verify)
     {
-        ui->Result_Display->setText("Acces granted !");
-        //Continuer la fonction (C'est find Account)
+        ui->Result_Display->setText("Wrong Password");
+        return false;
+    }
+    if(masterPassword == enteredPassword)
+    {
+        return true;
     }
     else
     {
-        ui->Result_Display->setText("Access refused.");
+        QMessageBox::warning(this,"Access Denied", "Incorrect Password");
+        return false;
     }
 }
 
@@ -39,10 +47,14 @@ void MainWindow::deletePassword()
     if(DeleteAccount(accountstr))
     {
         ui->Result_Display->setText("Account deleted successfully !");
+        ui->lineEdit_InputUsername->clear();
+        ui->lineEdit_InputPassword->clear();
     }
     else
     {
         ui->Result_Display->setText("Error ! Account not deleted.");
+        ui->lineEdit_InputUsername->clear();
+        ui->lineEdit_InputPassword->clear();
     }
 
 }
@@ -58,10 +70,14 @@ void MainWindow::modifyPassword()
     if(ModifyPassword(accountstr,new_passwordstr))
     {
         ui->Result_Display->setText("Password changed.");
+        ui->lineEdit_InputUsername->clear();
+        ui->lineEdit_InputPassword->clear();
     }
     else
     {
         ui->Result_Display->setText("Error ! Password not changed.");
+        ui->lineEdit_InputUsername->clear();
+        ui->lineEdit_InputPassword->clear();
     }
 }
 

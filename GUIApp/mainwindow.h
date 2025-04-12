@@ -16,10 +16,11 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    bool checkPassword();
+
 
 private:
     Ui::MainWindow *ui;
-    void checkPassword();
     void addPassword();
     void deletePassword();
     void modifyPassword();
