@@ -3,6 +3,10 @@
 #include "PasswordManager.h"
 #include "QInputDialog"
 #include "QMessageBox"
+#include <fstream>
+#include <Qdir>
+#include <QDebug>
+#include <QStandardPaths>
 
 bool MainWindow::checkPassword()
 {
@@ -25,17 +29,41 @@ bool MainWindow::checkPassword()
     }
 }
 
+void MainWindow::onOkCliqued()
+{
+    QString path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    std::string string_path = path.toStdString();
+    std::string new_string = string_path + "/Account.txt";
+    std::ofstream PasswordFile(new_string, std::ios::app);
+    addPassword();
+    std::string password_encrypted = Encrypt(passwordtemp);
+    if(AddPassword(usertemp,password_encrypted))
+    {
+        if(PasswordFile.is_open())
+        {
+            PasswordFile << usertemp << ":" << password_encrypted << std::endl;
+            PasswordFile.close();
+            ui->Result_Display->setText("Account added successfully !");
+        }
+        else
+        {
+            ui->Result_Display->setText("Error opening the file.");
+        }
+    }
+    else
+    {     ui->Result_Display->setText("Error adding the account.");
+    }
+    ui->lineEdit_InputUsername->clear();
+    ui->lineEdit_InputPassword->clear();
+}
+
 void MainWindow::addPassword()
 {
     ui->Result_Display->setText("Enter an username and a password.");
     QString username = ui->lineEdit_InputUsername->text();
     QString password = ui->lineEdit_InputPassword->text();
-    std::string user = username.toStdString();
-    std::string pass = password.toStdString();
-    AddPassword(user,pass);
-    ui->Result_Display->setText("Account added successfully !");
-    ui->lineEdit_InputUsername->clear();
-    ui->lineEdit_InputPassword->clear();
+    usertemp = username.toStdString();
+    passwordtemp = password.toStdString();
 }
 
 
@@ -89,6 +117,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->findAccount, &QPushButton::clicked, this, &MainWindow::checkPassword);
     connect(ui->addAccount, &QPushButton::clicked, this, &MainWindow::addPassword);
     connect(ui->deletePassword, &QPushButton::clicked, this, &MainWindow::deletePassword);
+    connect(ui->OKButton, &QPushButton::clicked, this, &MainWindow::onOkCliqued);
 }
 
 MainWindow::~MainWindow()
