@@ -24,5 +24,8 @@ private:
     void addPassword();
     void deletePassword();
     void modifyPassword();
+    void onOkCliqued();
+    std::string usertemp;
+    std::string passwordtemp;
 };
 #endif // MAINWINDOW_H
