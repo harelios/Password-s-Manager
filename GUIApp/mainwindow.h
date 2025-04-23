@@ -25,7 +25,9 @@ private:
     void deletePassword();
     void modifyPassword();
     void onOkCliqued();
+    bool showAllAccount();
     std::string usertemp;
     std::string passwordtemp;
+    QString currentAction;
 };
 #endif // MAINWINDOW_H

@@ -31,64 +31,103 @@ bool MainWindow::checkPassword()
 
 void MainWindow::onOkCliqued()
 {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
-    std::string string_path = path.toStdString();
-    std::string new_string = string_path + "/Account.txt";
-    std::ofstream PasswordFile(new_string, std::ios::app);
-    addPassword();
-    std::string password_encrypted = Encrypt(passwordtemp);
-    if(AddPassword(usertemp,password_encrypted))
+    QString username = ui->lineEdit_InputUsername ->text();
+    QString password = ui->lineEdit_InputPassword ->text();
+    std::string usertemp = username.toStdString();
+    std::string passwordtemp = password.toStdString();
+    if(currentAction == "add")
     {
-        if(PasswordFile.is_open())
+        QString path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+        std::string string_path = path.toStdString();
+        std::string new_string = string_path + "/Account.txt";
+        std::ofstream PasswordFile(new_string, std::ios::app);
+        std::string password_encrypted = Encrypt(passwordtemp);
+
+        if(AddPassword(usertemp,password_encrypted))
         {
-            PasswordFile << usertemp << ":" << password_encrypted << std::endl;
-            PasswordFile.close();
-            ui->Result_Display->setText("Account added successfully !");
+            if(PasswordFile.is_open())
+            {
+                PasswordFile << usertemp << ":" << password_encrypted<<std::endl;
+                PasswordFile.close();
+                ui->Result_Display->setText("Account added successfully !");
+            }
+            else
+            {
+                ui->Result_Display->setText("Error opening the file.");
+            }
         }
         else
         {
-            ui->Result_Display->setText("Error opening the file.");
+            ui->Result_Display->setText("Error adding the account.");
         }
+        ui->lineEdit_InputUsername->clear();
+        ui->lineEdit_InputPassword->clear();
     }
-    else
-    {     ui->Result_Display->setText("Error adding the account.");
-    }
-    ui->lineEdit_InputUsername->clear();
-    ui->lineEdit_InputPassword->clear();
+    else if(currentAction == "delete")
+    {
+        QString account = ui->lineEdit_InputUsername->text();
+        std::string accountstr = account.toStdString();
+        std::string ligne;
+        bool found = false;
+        QString path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+        std::string string_path = path.toStdString();
+        std::string tempstring = path.toStdString() + "temp.txt";
+        std::string new_string = string_path + "/Account.txt";
+        std::ifstream file_read(new_string);
+        std::ofstream file_write(tempstring);
+        while(std::getline(file_read,ligne))
+        {
+            size_t pos = ligne.find(":");
+            std::string username = ligne.substr(0,pos);
+            std::string password = ligne.substr((ligne.find(":")+1));
+            if(accountstr != username)
+            {
+                file_write << username << ":" << password << std::endl;
+            }
+            else
+            {
+                found = true;
+            }
+        }
+        file_read.close();
+        file_write.close();
+        ui->lineEdit_InputUsername->clear();
+        ui->lineEdit_InputPassword->clear();
+            if(remove(new_string.c_str())!=0)
+            {
+                ui->Result_Display->setText("Error ! The file was not deleted.");
+            }
+            else if(rename(tempstring.c_str(),new_string.c_str()))
+            {
+                ui->Result_Display->setText("Error renaming the file.");
+            }
+            else
+                if(found)
+                {
+                    ui->Result_Display->setText("Account deleted successfully.");
+                }
+                else
+                {
+                    ui-> Result_Display ->setText("Error ! Account not found.");
+                }
+    }    
 }
 
 void MainWindow::addPassword()
 {
+    currentAction = "add";
     ui->Result_Display->setText("Enter an username and a password.");
-    QString username = ui->lineEdit_InputUsername->text();
-    QString password = ui->lineEdit_InputPassword->text();
-    usertemp = username.toStdString();
-    passwordtemp = password.toStdString();
 }
-
 
 void MainWindow::deletePassword()
 {
+    currentAction = "delete";
     ui->Result_Display->setText("Enter an username.");
-    QString account = ui->lineEdit_InputUsername->text();
-    std::string accountstr = account.toStdString();
-    if(DeleteAccount(accountstr))
-    {
-        ui->Result_Display->setText("Account deleted successfully !");
-        ui->lineEdit_InputUsername->clear();
-        ui->lineEdit_InputPassword->clear();
-    }
-    else
-    {
-        ui->Result_Display->setText("Error ! Account not deleted.");
-        ui->lineEdit_InputUsername->clear();
-        ui->lineEdit_InputPassword->clear();
-    }
-
 }
 
 void MainWindow::modifyPassword()
 {
+    currentAction = "modify";
     ui->Result_Display->setText("Enter the username of the account you want to modify its password.");
     ui->Result_Display->setText("Enter the new password : ");
     QString account = ui->lineEdit_InputUsername->text();
@@ -109,6 +148,58 @@ void MainWindow::modifyPassword()
     }
 }
 
+
+bool MainWindow::showAllAccount()
+{
+    bool verify;
+    QString inputPassword = QInputDialog::getText(this,"Password required", "Enter the password to display all the account",QLineEdit::Password,"",&verify);
+    QString masterPassword = "Admin100";
+    if(!verify)
+    {
+        ui->Result_Display->setText("Wrong Password.");
+        return false;
+    }
+    if(inputPassword==masterPassword)
+    {
+        std::string ligne;
+        QString path = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+        std::string string_path = path.toStdString() + "/Account.txt";
+        std::ifstream file_read(string_path);
+        if(!file_read)
+        {
+            ui->Result_Display->setText("Error opening the file.");
+        }
+
+        bool foundsomething = false;
+        QString text;
+        while(getline(file_read,ligne))
+        {
+            if(ligne.empty()) continue;
+            size_t pos = ligne.find(":");
+            std::string username = ligne.substr(0,pos);
+            std::string password = ligne.substr(ligne.find(":") + 1);
+            std::string decryptedPassword = Decrypt(password);
+            text += "Username : " + QString::fromStdString(username) + "\n";
+            text += "Password : " + QString::fromStdString(decryptedPassword) + "\n\n";
+            foundsomething = true;
+        }
+        if(foundsomething)
+        {
+            ui->Result_Display->setText(text);
+        }
+        else
+        {
+            ui->Result_Display->setText("No account found, the file must be empty.");
+        }
+        return true;
+    }
+    else
+    {
+        QMessageBox::warning(this,"Error","Wrong Password");
+        return false;
+    }
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -118,6 +209,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->addAccount, &QPushButton::clicked, this, &MainWindow::addPassword);
     connect(ui->deletePassword, &QPushButton::clicked, this, &MainWindow::deletePassword);
     connect(ui->OKButton, &QPushButton::clicked, this, &MainWindow::onOkCliqued);
+    connect(ui->showAllPassword, &QPushButton::clicked,this,&MainWindow::showAllAccount);
 }
 
 MainWindow::~MainWindow()
