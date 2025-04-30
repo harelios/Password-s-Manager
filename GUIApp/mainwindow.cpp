@@ -137,42 +137,52 @@ void MainWindow::onOkCliqued()
         std::string new_string = string_path + "/Account.txt";
         std::ifstream file_read(new_string);
         std::ofstream file_write(tempstring);
-        while(std::getline(file_read,ligne))
+        QMessageBox::StandardButton msg;
+        msg = QMessageBox::question(this,"Confirmation","Do you really want to modify the password ?");
+        if(msg == QMessageBox::Yes)
         {
-            size_t pos = ligne.find(":");
-            std::string username = ligne.substr(0,pos);
-            std::string password = ligne.substr(ligne.find(":")+1);
-            if(username == accountstr)
+            while(std::getline(file_read,ligne))
             {
-                file_write << username << ":" << encrypted_password <<std::endl;
-                found = true;
+                size_t pos = ligne.find(":");
+                std::string username = ligne.substr(0,pos);
+                std::string password = ligne.substr(ligne.find(":")+1);
+                if(username == accountstr)
+                {
+                    file_write << username << ":" << encrypted_password <<std::endl;
+                    found = true;
+                }
+                else
+                {
+                    file_write << ligne << std::endl;
+                }
+            }
+            file_read.close();
+            file_write.close();
+            ui->lineEdit_InputUsername->clear();
+            ui->lineEdit_InputPassword->clear();
+            if(found)
+            {
+                ui->Result_Display->setText("Password modified successfully.");
+                if(remove(new_string.c_str())!=0)
+                {
+                    ui->Result_Display->setText("Error removing the file.");
+                }
+                else if(rename(tempstring.c_str(),new_string.c_str())!=0)
+                {
+                    ui->Result_Display->setText("Error renaming the file.");
+                }
             }
             else
             {
-                file_write << ligne << std::endl;
-            }
-        }
-        file_read.close();
-        file_write.close();
-        ui->lineEdit_InputUsername->clear();
-        ui->lineEdit_InputPassword->clear();
-        if(found)
-        {
-            ui->Result_Display->setText("Password modified successfully.");
-            if(remove(new_string.c_str())!=0)
-            {
-                ui->Result_Display->setText("Error removing the file.");
-            }
-            else if(rename(tempstring.c_str(),new_string.c_str())!=0)
-            {
-                ui->Result_Display->setText("Error renaming the file.");
+                ui->Result_Display->setText("No matching account found.");
             }
         }
         else
         {
-            ui->Result_Display->setText("No matching account found.");
+         return;
         }
     }
+
 }
 
 void MainWindow::addPassword()
@@ -245,17 +255,22 @@ bool MainWindow::showAllAccount()
     }
 }
 
+void MainWindow::Quit()
+{
+    QApplication::quit();
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(ui->findAccount, &QPushButton::clicked, this, &MainWindow::checkPassword);
     connect(ui->addAccount, &QPushButton::clicked, this, &MainWindow::addPassword);
     connect(ui->deletePassword, &QPushButton::clicked, this, &MainWindow::deletePassword);
     connect(ui->OKButton, &QPushButton::clicked, this, &MainWindow::onOkCliqued);
     connect(ui->showAllPassword, &QPushButton::clicked,this,&MainWindow::showAllAccount);
     connect(ui->modifyPassword,&QPushButton::clicked,this,&MainWindow::modifyPassword);
+    connect(ui->Quit, &QPushButton::clicked,this,&MainWindow::Quit);
 }
 
 MainWindow::~MainWindow()

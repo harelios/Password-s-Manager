@@ -26,6 +26,7 @@ private:
     void modifyPassword();
     void onOkCliqued();
     bool showAllAccount();
+    void Quit();
     std::string usertemp;
     std::string passwordtemp;
     QString currentAction;

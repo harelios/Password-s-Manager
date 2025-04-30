@@ -62,30 +62,17 @@
       <string>Modify password</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="showAllPassword_2">
-     <property name="geometry">
-      <rect>
-       <x>130</x>
-       <y>140</y>
-       <width>131</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Show all password</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="findAccount">
+    <widget class="QPushButton" name="showAllPassword">
      <property name="geometry">
       <rect>
        <x>130</x>
        <y>110</y>
        <width>131</width>
-       <height>29</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>Find an account</string>
+      <string>Show all account</string>
      </property>
     </widget>
     <widget class="QTextEdit" name="Result_Display">
@@ -155,6 +142,19 @@
      </property>
      <property name="text">
       <string>Password</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Quit">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>310</y>
+       <width>93</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Quit</string>
      </property>
     </widget>
    </widget>
